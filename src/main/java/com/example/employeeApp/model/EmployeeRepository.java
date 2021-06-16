@@ -10,5 +10,18 @@ import java.util.Optional;
 @Component
 public interface EmployeeRepository extends JpaRepository<Employee, String> {
     List<Employee> findAll();
+
+    List<Employee> findAllByOrderByIdAsc();
+    List<Employee> findAllByOrderByIdDesc();
+
+    List<Employee> findAllByOrderByLoginAsc();
+    List<Employee> findAllByOrderByLoginDesc();
+
+    List<Employee> findAllByOrderByNameAsc();
+    List<Employee> findAllByOrderByNameDesc();
+
+    List<Employee> findAllByOrderBySalaryAsc();
+    List<Employee> findAllByOrderBySalaryDesc();
+
     Optional<Employee> findById(String id);
 }
