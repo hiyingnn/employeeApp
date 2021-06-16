@@ -60,7 +60,7 @@ class MainPage extends React.Component {
                             color: '#ffffff',
                         }
                     ,
-                        label: <strong>{number.toString()}</strong>
+                        label: <strong>{Math.ceil(number).toString()}</strong>
                     }
                 }
                 }
@@ -99,9 +99,6 @@ class MainPage extends React.Component {
         let filterOptions = {...this.state.filterOptions};
         filterOptions.searchValue = searchValue;
         this.setState({filterOptions}, () => this.fetchFilteredResults());
-        // filterOptions.searchValue = "";
-        // this.setState({filterOptions})
-
 
     };
 
@@ -114,7 +111,6 @@ class MainPage extends React.Component {
     };
 
     fetchFilteredResults = () => {
-        console.log(this.state.filterOptions);
         const httpUrl = `users/sortOption=${this.state.filterOptions.sortOption}&sortOrder=${this.state.filterOptions.sortOrder}&filterValue=${Object.values(this.state.filterOptions.filterValue)[0]}-${Object.values(this.state.filterOptions.filterValue)[1]}&searchOption=${this.state.filterOptions.searchOption}&searchValue=${this.state.filterOptions.searchValue}`;
 
         // const httpUrl = `users/sortOption=${this.state.filterOptions.sortOption}&sortOrder=${this.state.filterOptions.sortOrder}`;
@@ -151,7 +147,6 @@ class MainPage extends React.Component {
 
     render() {
         const { collapsed } = this.state;
-        console.log(this.state);
 
         if(this.state.loading) return (<Spin/>);
 

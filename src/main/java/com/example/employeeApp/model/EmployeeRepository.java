@@ -24,4 +24,7 @@ public interface EmployeeRepository extends JpaRepository<Employee, String> {
     List<Employee> findAllByOrderBySalaryDesc();
 
     Optional<Employee> findById(String id);
+
+    Employee save(Employee e);
+    void deleteById(String s);
 }

@@ -3,10 +3,12 @@ package com.example.employeeApp.controller;
 import com.example.employeeApp.model.Employee;
 import com.example.employeeApp.model.EmployeeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -52,12 +54,6 @@ public class EmployeeController {
             }
         }
 
-        System.out.println(sval);
-        System.out.println(sval.equals(""));
-        System.out.println(sval.equals("\r"));
-        System.out.println(sval.equals("\n"));
-        System.out.println(sval.length() == 0);
-
         return sval.length() == 0
                 ? empList.stream().filter(e -> e.getSalary() >= lower && e.getSalary() <= upper).collect(Collectors.toList())
                 : empList.stream().filter( e ->
@@ -75,9 +71,22 @@ public class EmployeeController {
         return empRepository.findById(id);
     }
 
-    @PutMapping("/user/{id}")
-    Optional<Employee> updateEmployeeInformation(@PathVariable String id) {
-        return empRepository.findById(id);
+    @RequestMapping(value = "/users",
+            produces = "application/json",
+            method=RequestMethod.PUT)
+    @ResponseBody
+    HttpStatus updateEmployeeInformation(@RequestBody Map<String, String> data) {
+        //TODO: handle id updates...
+        System.out.println("updating");
+        System.out.println(data);
+        empRepository.save(new Employee(data.get("id"), data.get("login"), data.get("name"), Long.parseLong(data.get("salary"))));
+        return HttpStatus.OK;
+    }
+
+    @DeleteMapping("/users/{id}")
+    HttpStatus deleteEmployeeById(@PathVariable String id) {
+        empRepository.deleteById(id);
+        return HttpStatus.OK;
     }
 }
 

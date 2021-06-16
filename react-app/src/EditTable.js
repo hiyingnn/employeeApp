@@ -47,10 +47,9 @@ const EditTable= (props) => {
     useEffect(() => setData(props.data), [props.data]);
 
     const isEditing = (record) => record.key === editingKey;
-    console.log(data);
-    console.log(props.data);
 
     const editRecord = (record) => {
+        console.log("editted");
         form.setFieldsValue({
             id: '',
             login: '',
@@ -61,8 +60,15 @@ const EditTable= (props) => {
     };
 
     const deleteRecord = (record) => {
-        console.log("deleting record"+ record);
-    }
+        console.log("deleting record"+ record.id);
+
+        const requestOptions = {
+            method: 'DELETE',
+        };
+        console.log(requestOptions);
+        fetch(`users/${record.id}`, requestOptions)
+            .then(response => response.json());
+    };
 
     const cancel = () => {
         setEditingKey('');
@@ -84,7 +90,17 @@ const EditTable= (props) => {
                 setData(newData);
                 setEditingKey('');
             }
-            console.log(newData);
+            // put request
+            const requestOptions = {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(row)
+            };
+            console.log(requestOptions);
+
+            fetch(`users`, requestOptions)
+                .then(response => response.json())
+
         } catch (errInfo) {
             console.log('Validate Failed:', errInfo);
         }
