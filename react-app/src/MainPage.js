@@ -25,7 +25,7 @@ class MainPage extends React.Component {
         maxSal: 1000,
         loading: true,
         filterOptions :{
-            searchOption: "",
+            searchOption: "id",
             searchValue:"",
             sortOption:"id",
             sortOrder:"asc",
@@ -94,9 +94,15 @@ class MainPage extends React.Component {
     onPressEnter = (e) => {
         console.log(`press enter:${e.target.value}`);
         const searchValue = e.target.value;
+
+        console.log('search:', searchValue);
         let filterOptions = {...this.state.filterOptions};
         filterOptions.searchValue = searchValue;
-        this.setState({filterOptions})
+        this.setState({filterOptions}, () => this.fetchFilteredResults());
+        // filterOptions.searchValue = "";
+        // this.setState({filterOptions})
+
+
     };
 
     handleChangeOrder = (e) => {
@@ -109,7 +115,7 @@ class MainPage extends React.Component {
 
     fetchFilteredResults = () => {
         console.log(this.state.filterOptions);
-        const httpUrl = `users/sortOption=${this.state.filterOptions.sortOption}&sortOrder=${this.state.filterOptions.sortOrder}&filterValue=${Object.values(this.state.filterOptions.filterValue)[0]}-${Object.values(this.state.filterOptions.filterValue)[1]}`;
+        const httpUrl = `users/sortOption=${this.state.filterOptions.sortOption}&sortOrder=${this.state.filterOptions.sortOrder}&filterValue=${Object.values(this.state.filterOptions.filterValue)[0]}-${Object.values(this.state.filterOptions.filterValue)[1]}&searchOption=${this.state.filterOptions.searchOption}&searchValue=${this.state.filterOptions.searchValue}`;
 
         // const httpUrl = `users/sortOption=${this.state.filterOptions.sortOption}&sortOrder=${this.state.filterOptions.sortOrder}`;
         fetch(httpUrl)
@@ -129,10 +135,18 @@ class MainPage extends React.Component {
     };
 
     onSearch = (searchValue) => {
+
         console.log('search:', searchValue);
         let filterOptions = {...this.state.filterOptions};
         filterOptions.searchValue = searchValue;
-        this.setState({filterOptions})
+        this.setState({filterOptions},  () => this.fetchFilteredResults());
+    };
+
+    onSearchClear = () => {
+        console.log("search clear");
+        let filterOptions = {...this.state.filterOptions};
+        filterOptions.searchValue = "";
+        this.setState({filterOptions},  () =>this.fetchFilteredResults());
     };
 
     render() {
@@ -217,7 +231,7 @@ class MainPage extends React.Component {
                                                 <Option value="name">Name</Option>
                                                 <Option value="salary">Salary</Option>
                                             </Select>
-                                            <Search allowClear placeholder="input search text" onSearch={this.onSearch} style={{ width: 500 }} onPressEnter={this.onPressEnter} />
+                                            <Search allowClear placeholder="input search text" onSearch={this.onSearch} style={{ width: 500 }} onPressEnter={this.onPressEnter} onClear={this.onSearchClear} />
                                             </div>
                                         </Card>
                                     </Col>
