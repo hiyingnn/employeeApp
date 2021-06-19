@@ -61,14 +61,21 @@ const EditTable= (props) => {
 
     const deleteRecord = (record) => {
         console.log("deleting record"+ record.id);
+        const newData = [...data];
+
+        const index =newData.findIndex(item => record.id === item.id);
+        if (index > -1) {
+            newData.splice(index, 1);
+            setData(newData);
+        }
 
         const requestOptions = {
             method: 'DELETE',
         };
         console.log(requestOptions);
         fetch(`users/${record.id}`, requestOptions)
-            .then(response => response.json());
-    };
+            .then(response => response.json())
+        };
 
     const cancel = () => {
         setEditingKey('');

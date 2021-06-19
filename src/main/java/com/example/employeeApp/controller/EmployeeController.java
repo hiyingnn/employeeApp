@@ -2,14 +2,16 @@ package com.example.employeeApp.controller;
 
 import com.example.employeeApp.model.Employee;
 import com.example.employeeApp.model.EmployeeRepository;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.io.*;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -79,7 +81,7 @@ public class EmployeeController {
         //TODO: handle id updates...
         System.out.println("updating");
         System.out.println(data);
-        empRepository.save(new Employee(data.get("id"), data.get("login"), data.get("name"), Long.parseLong(data.get("salary"))));
+        empRepository.save(new Employee(data.get("id"), data.get("login"), data.get("name"), Double.parseDouble(data.get("salary"))));
         return HttpStatus.OK;
     }
 
@@ -87,6 +89,49 @@ public class EmployeeController {
     HttpStatus deleteEmployeeById(@PathVariable String id) {
         empRepository.deleteById(id);
         return HttpStatus.OK;
+    }
+
+    @PostMapping(value="/upload")
+    public String uploadCSVFile(@RequestParam("file") MultipartFile file) throws IOException {
+        InputStream is  = file.getInputStream();
+        List<String> validHeader = Arrays.asList("id" ,"login","name","salary");
+
+        try (BufferedReader fileReader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+             CSVParser csvParser = new CSVParser(fileReader,
+                     CSVFormat.DEFAULT.withFirstRecordAsHeader().withIgnoreHeaderCase().withTrim());) {
+
+            if (!csvParser.getHeaderNames().equals(validHeader)) {
+                return "invalid headers";
+            }
+
+            List<Employee> employees = new ArrayList<Employee>();
+
+            Iterable<CSVRecord> csvRecords = csvParser.getRecords();
+            for (CSVRecord csvRecord : csvRecords) {
+                try {
+                    System.out.println("adding new row");
+                    Employee emp = new Employee(
+                            csvRecord.get("id"),
+                            csvRecord.get("login"),
+                            csvRecord.get("name"),
+                            Double.parseDouble(csvRecord.get("salary"))
+                    );
+                    employees.add(emp);
+                } catch (IllegalArgumentException e) {
+                    System.out.println(e);
+                    if (csvRecord.get(0).charAt(0) == '#') {
+                        System.out.println("THere exists a #, comment");
+                    } else {
+                        return "csv file error";
+                    }
+                }
+            }
+            empRepository.saveAll(employees);
+
+            return "csv file success";
+        } catch (IOException e) {
+            throw new RuntimeException("fail to parse CSV file: " + e.getMessage());
+        }
     }
 }
 

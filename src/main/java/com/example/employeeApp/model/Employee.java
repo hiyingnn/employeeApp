@@ -1,5 +1,6 @@
 package com.example.employeeApp.model;
 
+import com.opencsv.bean.CsvBindByName;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
@@ -16,18 +17,22 @@ import javax.persistence.Table;
 @Table(name = "Employee")
 public class Employee {
     @Id
+    @CsvBindByName
     private String id;
 
     @NonNull
+    @CsvBindByName
     private String login;
 
     @NonNull
+    @CsvBindByName
     private String name;
 
     @NonNull
-    private long salary;
+    @CsvBindByName
+    private double salary;
 
-    public Employee(String id, String login, String name, long salary) {
+    public Employee(String id, String login, String name, double salary) {
         this.id = id;
         this.login = login;
         this.name = name;
@@ -46,7 +51,7 @@ public class Employee {
         return name;
     }
 
-    public long getSalary() {
+    public double getSalary() {
         return salary;
     }
 }

@@ -38,6 +38,14 @@ class MainPage extends React.Component {
         this.setState({ collapsed });
     };
 
+    onClickUpload = () => {
+        this.props.history.push("/upload");
+    }
+
+    onClickEmployee = () => {
+        this.props.history.push("/");
+    }
+
     componentDidMount = () => {
         const httpUrl = `users`;
         fetch(httpUrl)
@@ -148,8 +156,6 @@ class MainPage extends React.Component {
     render() {
         const { collapsed } = this.state;
 
-        if(this.state.loading) return (<Spin/>);
-
         const marks = this.state.marks;
 
         return (
@@ -157,84 +163,87 @@ class MainPage extends React.Component {
                 <Sider collapsible collapsed={collapsed} onCollapse={this.onCollapse}>
                     <div className="logo" />
                     <Menu theme="dark" defaultSelectedKeys={['1']} mode="inline">
-                        <Menu.Item key="1" icon={<PieChartOutlined />}>
+                        <Menu.Item key="1" icon={<PieChartOutlined />} onClick={this.onClickEmployee}>
                             Current Employees
                         </Menu.Item>
-                        <Menu.Item key="2" icon={<UploadOutlined />}>
+                        <Menu.Item key="2" icon={<UploadOutlined />} onClick={this.onClickUpload}>
                             Upload CSV
                         </Menu.Item>
                     </Menu>
                 </Sider>
                 <Layout className="site-layout">
                     <Header className="site-layout-background" style={{ padding: 0 }} />
-                    <Content style={{ margin: '0 16px' }}>
-                        <div className="site-layout-background" style={{ padding: 24, minHeight: 360 }}>
-                            <div  style={{padding:20}}>
-                                <div style ={{marginBottom: 20}}>
-                                    <Row gutter={16} type="flex">
-                                        <Col span={8} style={{height: "100%"}}>
-                                            <Card bordered={false} style={{backgroundColor: "#5b6069"}}>
-                                                <div style={{ alignItems:"center", marginTop:"15"}}>
+                    {this.state.loading ? <Spin/> :
+
+                        <Content style={{ margin: '0 16px' }}>
+                            <div className="site-layout-background" style={{ padding: 24, minHeight: 360 }}>
+                                <div  style={{padding:20}}>
+                                    <div style ={{marginBottom: 20}}>
+                                        <Row gutter={16} type="flex">
+                                            <Col span={8} style={{height: "100%"}}>
+                                                <Card bordered={false} style={{backgroundColor: "#5b6069"}}>
+                                                    <div style={{ alignItems:"center", marginTop:"15"}}>
                                                         <Avatar size={58} style={{color: "#000000", backgroundColor: "#ffffff"}} icon={<SortAscendingOutlined/>} />
                                                         <h1 style={{fontSize: 30, color:"#ffffff"}}> Sort By: </h1>
+                                                    </div>
+                                                    <div >
+                                                        <Select defaultValue="id" style={{flex:30, marginBottom:15, width:200}} onChange={this.handleChangeOption}>
+                                                            <Option value="id">Employer Id</Option>
+                                                            <Option value="login">Login Id</Option>
+                                                            <Option value="name">Name</Option>
+                                                            <Option value="salary">Salary</Option>xw
+                                                        </Select>
+                                                        <Radio.Group onChange={this.handleChangeOrder} defaultValue="asc" buttonStyle="solid">
+                                                            <Radio.Button value="asc">Ascending</Radio.Button>
+                                                            <Radio.Button value="desc">Descending</Radio.Button>
+                                                        </Radio.Group>
+                                                        <Button type="primary" icon={<CheckOutlined />} style={{flex:30, marginTop:15, width:200,  backgroundColor: "#339933", borderColor:"#339933"}} onClick={this.onClickSort}>
+                                                            Sort
+                                                        </Button>
+                                                    </div>
+
+                                                </Card>
+                                            </Col>
+                                            <Col span={16}>
+                                                <Card bordered={false} style={{backgroundColor: "#5b6069"}}>
+                                                    <div style={{ alignItems:"center", marginTop:"30"}}>
+                                                        <Avatar size={58} style={{color: "#000000", backgroundColor: "#ffffff"}} icon={<FilterOutlined />} />
+                                                        <h1 style={{fontSize: 30, color:"#ffffff"}}> Filter By Salary </h1>
+                                                    </div>
+                                                    <Slider key={`slider`} range marks={marks} max={this.state.maxSal} min={this.state.minSal} value={this.state.filterOptions.filterValue}  trackStyle={{backgroundColor: "#2563e5"}} handleStyle={{backgroundColor:"#2563e5"}}  onChange={this.onSliderChange} style={{marginTop:30}}/>
+
+                                                    <Button type="primary" icon={<CheckOutlined />} style={{flex:30, marginTop:38, width:400,  backgroundColor: "#339933", borderColor:"#339933"}} onClick={this.onClickFilter}>
+                                                        Filter
+                                                    </Button>
+                                                </Card>
+                                            </Col>
+                                        </Row>
+                                    </div>
+                                    <Row>
+                                        <Col span={24}>
+                                            <Card bordered={false} style={{backgroundColor: "#5b6069"}}>
+                                                <div style={{ alignItems:"center", marginTop:"15"}}>
+                                                    <Avatar size={58} style={{color: "#000000", backgroundColor: "#ffffff"}} icon={<FilterOutlined />} />
+                                                    <h1 style={{fontSize: 30, color:"#ffffff"}}> Search By: </h1>
                                                 </div>
-                                                <div >
-                                                    <Select defaultValue="id" style={{flex:30, marginBottom:15, width:200}} onChange={this.handleChangeOption}>
+                                                <div style={{ alignItems:"center", marginTop:"15"}}>
+
+                                                    <Select defaultValue="id" style={{flex:30, marginRight: 15, width:200}} onChange={this.handleChangeSearchOption}>
                                                         <Option value="id">Employer Id</Option>
                                                         <Option value="login">Login Id</Option>
                                                         <Option value="name">Name</Option>
-                                                        <Option value="salary">Salary</Option>xw
+                                                        <Option value="salary">Salary</Option>
                                                     </Select>
-                                                    <Radio.Group onChange={this.handleChangeOrder} defaultValue="asc" buttonStyle="solid">
-                                                        <Radio.Button value="asc">Ascending</Radio.Button>
-                                                        <Radio.Button value="desc">Descending</Radio.Button>
-                                                    </Radio.Group>
-                                                    <Button type="primary" icon={<CheckOutlined />} style={{flex:30, marginTop:15, width:200,  backgroundColor: "#339933", borderColor:"#339933"}} onClick={this.onClickSort}>
-                                                        Sort
-                                                    </Button>
+                                                    <Search allowClear placeholder="input search text" onSearch={this.onSearch} style={{ width: 500 }} onPressEnter={this.onPressEnter} onClear={this.onSearchClear} />
                                                 </div>
-
-                                            </Card>
-                                        </Col>
-                                        <Col span={16}>
-                                            <Card bordered={false} style={{backgroundColor: "#5b6069"}}>
-                                                <div style={{ alignItems:"center", marginTop:"30"}}>
-                                                    <Avatar size={58} style={{color: "#000000", backgroundColor: "#ffffff"}} icon={<FilterOutlined />} />
-                                                    <h1 style={{fontSize: 30, color:"#ffffff"}}> Filter By Salary </h1>
-                                                </div>
-                                                <Slider key={`slider`} range marks={marks} max={this.state.maxSal} min={this.state.minSal} value={this.state.filterOptions.filterValue}  trackStyle={{backgroundColor: "#2563e5"}} handleStyle={{backgroundColor:"#2563e5"}}  onChange={this.onSliderChange} style={{marginTop:30}}/>
-
-                                                <Button type="primary" icon={<CheckOutlined />} style={{flex:30, marginTop:38, width:400,  backgroundColor: "#339933", borderColor:"#339933"}} onClick={this.onClickFilter}>
-                                                    Filter
-                                                </Button>
                                             </Card>
                                         </Col>
                                     </Row>
-                                    </div>
-                                <Row>
-                                    <Col span={24}>
-                                        <Card bordered={false} style={{backgroundColor: "#5b6069"}}>
-                                            <div style={{ alignItems:"center", marginTop:"15"}}>
-                                                <Avatar size={58} style={{color: "#000000", backgroundColor: "#ffffff"}} icon={<FilterOutlined />} />
-                                                <h1 style={{fontSize: 30, color:"#ffffff"}}> Search By: </h1>
-                                            </div>
-                                            <div style={{ alignItems:"center", marginTop:"15"}}>
-
-                                            <Select defaultValue="id" style={{flex:30, marginRight: 15, width:200}} onChange={this.handleChangeSearchOption}>
-                                                <Option value="id">Employer Id</Option>
-                                                <Option value="login">Login Id</Option>
-                                                <Option value="name">Name</Option>
-                                                <Option value="salary">Salary</Option>
-                                            </Select>
-                                            <Search allowClear placeholder="input search text" onSearch={this.onSearch} style={{ width: 500 }} onPressEnter={this.onPressEnter} onClear={this.onSearchClear} />
-                                            </div>
-                                        </Card>
-                                    </Col>
-                                </Row>
+                                </div>
+                                <EditTable data = {this.state.data}/>
                             </div>
-                            <EditTable data = {this.state.data}/>
-                        </div>
-                    </Content>
+                        </Content>
+                    }
                 </Layout>
             </Layout>
         );
