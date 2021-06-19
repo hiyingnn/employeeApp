@@ -12,6 +12,7 @@ const { Header, Content, Sider } = Layout;
 class UploadPage extends React.Component {
     state = {
         collapsed: false,
+        uploading: false
         };
 
     onClickUpload = () => {
@@ -34,11 +35,14 @@ class UploadPage extends React.Component {
     onChange = (info) => {
         if (info.file.status !== 'uploading') {
             console.log(info.file, info.fileList);
+            this.state.uploading = true;
         }
         if (info.file.status === 'done') {
            message.success(`${info.file.name} file uploaded successfully`);
+            this.state.uploading = false;
         } else if (info.file.status === 'error') {
             message.error(`${info.file.name} file upload failed.`);
+            this.state.uploading = false;
         }
     };
 
@@ -64,7 +68,7 @@ class UploadPage extends React.Component {
                     <Header className="site-layout-background" style={{ padding: 0 }} />
                     <Content style={{ margin: '0 16px' }}>
                         <Upload accept=".csv">
-                            <Button icon={<UploadOutlined /> } style={{ margin: 50, width:200}}>Click to Upload</Button>
+                            <Button icon={<UploadOutlined /> }  disabled={this.state.uploading} style={{ margin: 50, width:200}}>Click to Upload</Button>
                         </Upload>,
                     </Content>
                 </Layout>

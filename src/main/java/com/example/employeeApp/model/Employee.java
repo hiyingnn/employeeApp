@@ -6,9 +6,8 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
+import java.util.Objects;
 
 @Data
 @Entity
@@ -22,6 +21,7 @@ public class Employee {
 
     @NonNull
     @CsvBindByName
+    @Column(unique=true)
     private String login;
 
     @NonNull
@@ -34,6 +34,12 @@ public class Employee {
 
     public Employee(String id, String login, String name, double salary) {
         this.id = id;
+        this.login = login;
+        this.name = name;
+        this.salary = salary;
+    }
+
+    public void updateInfo(String login, String name, double salary) {
         this.login = login;
         this.name = name;
         this.salary = salary;
@@ -53,6 +59,22 @@ public class Employee {
 
     public double getSalary() {
         return salary;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Employee employee = (Employee) o;
+        return Double.compare(employee.salary, salary) == 0 &&
+                Objects.equals(id, employee.id) &&
+                Objects.equals(login, employee.login) &&
+                Objects.equals(name, employee.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, login, name, salary);
     }
 }
 

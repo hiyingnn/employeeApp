@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Input, InputNumber, Popconfirm, Form, Typography, Space } from 'antd';
+import { message, Table, Input, InputNumber, Popconfirm, Form, Typography, Space } from 'antd';
 import {
     EditOutlined,
     DeleteOutlined
@@ -49,7 +49,7 @@ const EditTable= (props) => {
     const isEditing = (record) => record.key === editingKey;
 
     const editRecord = (record) => {
-        console.log("editted");
+        console.log("edited");
         form.setFieldsValue({
             id: '',
             login: '',
@@ -83,30 +83,39 @@ const EditTable= (props) => {
 
     const save = async (key) => {
         try {
+            console.log("key", key);
             const row = await form.validateFields();
+            row.id = key;
             const newData = [...data];
             const index = newData.findIndex((item) => key === item.key);
 
             if (index > -1) {
                 const item = newData[index];
                 newData.splice(index, 1, { ...item, ...row });
-                setData(newData);
                 setEditingKey('');
             } else {
                 newData.push(row);
-                setData(newData);
                 setEditingKey('');
             }
-            // put request
+
             const requestOptions = {
-                method: 'PUT',
+                method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(row)
             };
             console.log(requestOptions);
 
             fetch(`users`, requestOptions)
-                .then(response => response.json())
+                .then(response => {
+                        console.log(response);
+                        if (!response.ok) {
+                            message.error(`Employee id: ${row.id} update fail.`);
+                        } else {
+                            message.success(`Employee id: ${row.id} update success.`);
+                            setData(newData);
+                        }
+                    }
+                )
 
         } catch (errInfo) {
             console.log('Validate Failed:', errInfo);
@@ -118,7 +127,7 @@ const EditTable= (props) => {
             title: 'Employee Id',
             dataIndex: 'id',
             width: '15%',
-            editable: true,
+            editable: false,
         },
         {
             title: 'Login Id',

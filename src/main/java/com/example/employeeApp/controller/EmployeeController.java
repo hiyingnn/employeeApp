@@ -7,6 +7,7 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -75,24 +76,47 @@ public class EmployeeController {
 
     @RequestMapping(value = "/users",
             produces = "application/json",
-            method=RequestMethod.PUT)
+            method=RequestMethod.PATCH)
     @ResponseBody
-    HttpStatus updateEmployeeInformation(@RequestBody Map<String, String> data) {
-        //TODO: handle id updates...
+    ResponseEntity<String> updateEmployeeInformation(@RequestBody Map<String, String> data) {
         System.out.println("updating");
         System.out.println(data);
+        Employee existingEmp = getEmployeeById(data.get("id")).get();
+        Optional<Employee> otherLogin = empRepository.findByLogin(data.get("login"));
+        if (otherLogin.isPresent() && otherLogin.get().equals(existingEmp) && data.get("id") != otherLogin.get().getId()) {
+            return new ResponseEntity<>("Cannot update to login id, already exist in database: " + data.get("login"), HttpStatus.BAD_REQUEST);
+        }
+
+        if (Double.parseDouble(data.get("salary")) < 0) {
+            return new ResponseEntity<>("Cannot update salary to negative: ", HttpStatus.BAD_REQUEST);
+        }
+        existingEmp.updateInfo(data.get("login"), data.get("name"), Double.parseDouble(data.get("salary")));
+        empRepository.save(existingEmp);
+        return new ResponseEntity<>("Updated existing employee with id: "+ data.get("id"), HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/users",
+            produces = "application/json",
+            method=RequestMethod.POST)
+    @ResponseBody
+    ResponseEntity<String> addNewEmployee(@RequestBody Map<String, String> data) {
+        System.out.println("adding new employee");
+        System.out.println(data);
+        if (getEmployeeById(data.get("id")).isPresent()) {
+            return new ResponseEntity<>("Cannot add new employee with id, already exist in database:" + data.get("id"), HttpStatus.BAD_REQUEST);
+        }
         empRepository.save(new Employee(data.get("id"), data.get("login"), data.get("name"), Double.parseDouble(data.get("salary"))));
-        return HttpStatus.OK;
+        return new ResponseEntity<>("Added new employee with id:"+ data.get("id"), HttpStatus.OK);
     }
 
     @DeleteMapping("/users/{id}")
-    HttpStatus deleteEmployeeById(@PathVariable String id) {
+    ResponseEntity<String> deleteEmployeeById(@PathVariable String id) {
         empRepository.deleteById(id);
-        return HttpStatus.OK;
+        return new ResponseEntity<>("Deleted employee with id: " + id, HttpStatus.OK);
     }
 
     @PostMapping(value="/upload")
-    public String uploadCSVFile(@RequestParam("file") MultipartFile file) throws IOException {
+    public ResponseEntity<String> uploadCSVFile(@RequestParam("file") MultipartFile file) throws IOException {
         InputStream is  = file.getInputStream();
         List<String> validHeader = Arrays.asList("id" ,"login","name","salary");
 
@@ -101,13 +125,16 @@ public class EmployeeController {
                      CSVFormat.DEFAULT.withFirstRecordAsHeader().withIgnoreHeaderCase().withTrim());) {
 
             if (!csvParser.getHeaderNames().equals(validHeader)) {
-                return "invalid headers";
+                return new ResponseEntity<>("Invalid headers", HttpStatus.BAD_REQUEST);
             }
 
-            List<Employee> employees = new ArrayList<Employee>();
+//            List<Employee> employees = new ArrayList<>();
+            Map<String, Employee> empIdMap = new HashMap<>();
+            Set<String> loginSet = new HashSet<>();
 
             Iterable<CSVRecord> csvRecords = csvParser.getRecords();
             for (CSVRecord csvRecord : csvRecords) {
+                System.out.println(loginSet.toString());
                 try {
                     System.out.println("adding new row");
                     Employee emp = new Employee(
@@ -116,21 +143,57 @@ public class EmployeeController {
                             csvRecord.get("name"),
                             Double.parseDouble(csvRecord.get("salary"))
                     );
-                    employees.add(emp);
+
+                    // check if salary is negative
+                    if (emp.getSalary() < 0) {
+                        return new ResponseEntity<>("Invalid salary, salary is negative", HttpStatus.BAD_REQUEST);
+                    }
+
+
+                    if (getEmployeeById(emp.getId()).isPresent()) {
+                        // check if existing employee id in DB, update if necessary
+                        System.out.println("existing in db" + emp.getId());
+                        Map<String, String> updateInfoMap = new HashMap<>();
+                        updateInfoMap.put("id", emp.getId());
+                        updateInfoMap.put("login", emp.getLogin());
+                        updateInfoMap.put("salary", Double.toString(emp.getSalary()));
+                        updateInfoMap.put("name", emp.getName());
+                        ResponseEntity<String> res = updateEmployeeInformation(updateInfoMap);
+                        if (!res.getStatusCode().is2xxSuccessful()) {
+                            return new ResponseEntity<>("Invalid login id in CSV", HttpStatus.BAD_REQUEST);
+
+                        }
+                    } else {
+                        if (empIdMap.containsKey(emp.getId())) {
+                            System.out.println("existing in map" + emp.getId());
+                            // check if existing employee id in in current CSV file, update if necessary
+                            Employee existingEmp = empIdMap.get(emp.getId());
+                            existingEmp.updateInfo(emp.getLogin(), emp.getName(), emp.getSalary());
+                            empIdMap.put(existingEmp.getId(), existingEmp);
+                        } else {
+                            // does not exist
+                            System.out.println("does not exist" + emp.getId());
+                            empIdMap.put(emp.getId(), emp);
+                        }
+                        if (loginSet.contains(emp.getLogin())) {
+                            return new ResponseEntity<>("Invalid login id in CSV", HttpStatus.BAD_REQUEST);
+                        }
+                        loginSet.add(emp.getLogin());
+                    }
                 } catch (IllegalArgumentException e) {
                     System.out.println(e);
                     if (csvRecord.get(0).charAt(0) == '#') {
                         System.out.println("THere exists a #, comment");
                     } else {
-                        return "csv file error";
+                        return new ResponseEntity<>("Invalid row in CSV", HttpStatus.BAD_REQUEST);
                     }
                 }
             }
-            empRepository.saveAll(employees);
+            empRepository.saveAll(empIdMap.values());
 
-            return "csv file success";
+            return new ResponseEntity<>("CSV uploaded", HttpStatus.OK);
         } catch (IOException e) {
-            throw new RuntimeException("fail to parse CSV file: " + e.getMessage());
+            return new ResponseEntity<>("Invalid CSV file, unable to parse", HttpStatus.BAD_REQUEST);
         }
     }
 }
