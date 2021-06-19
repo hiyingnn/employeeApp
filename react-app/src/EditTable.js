@@ -1,9 +1,26 @@
 import React, { useState, useEffect } from 'react';
-import { message, Table, Input, InputNumber, Popconfirm, Form, Typography, Space } from 'antd';
+import {Modal, message, Table, Input, InputNumber, Popconfirm, Form, Typography, Space, Button} from 'antd';
 import {
     EditOutlined,
-    DeleteOutlined
+    DeleteOutlined,
+    UserAddOutlined
 } from '@ant-design/icons';
+
+const layout = {
+    labelCol: {
+        span: 8,
+    },
+    wrapperCol: {
+        span: 16,
+    },
+};
+const tailLayout = {
+    wrapperCol: {
+        offset: 8,
+        span: 16,
+    },
+};
+
 const EditableCell = ({
                           editing,
                           dataIndex,
@@ -40,17 +57,60 @@ const EditableCell = ({
 };
 
 const EditTable= (props) => {
-    const [form] = Form.useForm();
+    const [editForm] = Form.useForm();
+    const [addForm] = Form.useForm();
+
     const [data, setData] = useState(props.data);
+    const [isModalVisible, setIsModalVisible] = useState(false);
     const [editingKey, setEditingKey] = useState('');
 
     useEffect(() => setData(props.data), [props.data]);
 
     const isEditing = (record) => record.key === editingKey;
 
+    const openAddModal = () => {
+        console.log("open modal");
+        addForm.setFieldsValue({
+            id: '',
+            login: '',
+            name: '',
+            salary: '',
+        });
+        setIsModalVisible(true);
+    };
+
+    const handleAdd = (row) => {
+        this.setData([...this.state.data, row]);
+    };
+
+    const handleOk = async () => {
+        const newRow = await addForm.validateFields();
+        const requestOptions = {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(newRow)
+        };
+        fetch(`users`, requestOptions)
+            .then(response => {
+                    console.log(response);
+                    if (!response.ok) {
+                        message.error(`Employee id: ${newRow.id} add fail.`);
+                    } else {
+                        message.success(`Employee id: ${newRow.id} add success.`);
+                        setData([...data, newRow]);
+                    }
+                }
+            );
+        setIsModalVisible(false);
+    };
+
+    const handleCancel = () => {
+        setIsModalVisible(false);
+    };
+
     const editRecord = (record) => {
         console.log("edited");
-        form.setFieldsValue({
+        editForm.setFieldsValue({
             id: '',
             login: '',
             name: '',
@@ -84,7 +144,7 @@ const EditTable= (props) => {
     const save = async (key) => {
         try {
             console.log("key", key);
-            const row = await form.validateFields();
+            const row = await editForm.validateFields();
             row.id = key;
             const newData = [...data];
             const index = newData.findIndex((item) => key === item.key);
@@ -115,7 +175,7 @@ const EditTable= (props) => {
                             setData(newData);
                         }
                     }
-                )
+                );
 
         } catch (errInfo) {
             console.log('Validate Failed:', errInfo);
@@ -197,22 +257,92 @@ const EditTable= (props) => {
         };
     });
     return (
-        <Form form={form} component={false}>
-            <Table
-                components={{
-                    body: {
-                        cell: EditableCell,
-                    },
-                }}
-                bordered
-                dataSource={data}
-                columns={mergedColumns}
-                rowClassName="editable-row"
-                pagination={{
-                    onChange: cancel,
-                }}
-            />
-        </Form>
+        <div>
+            <Button  size="large" type="primary" icon={<UserAddOutlined />} style={{marginTop:15, marginBottom:15, width:200,  backgroundColor: "#339933", borderColor:"#339933"}} onClick={openAddModal}>
+                Add New Employee
+            </Button>
+            <Modal title="Add new Employee" visible={isModalVisible} onOk={handleOk} onCancel={handleCancel}>
+                <Form
+                    {...layout}
+                    form={addForm}
+                    name="basic"
+                    onFinish={handleOk}
+                    onFinishFailed={handleCancel}
+                >
+                    <Form.Item
+                        label="Employer id"
+                        name="id"
+                        rules={[
+                            {
+                                required: true,
+                                message: 'Please input employer id!',
+                            },
+                        ]}
+                    >
+                        <Input />
+                    </Form.Item>
+
+                    <Form.Item
+                        label="Login id"
+                        name="login"
+                        rules={[
+                            {
+                                required: true,
+                                message: 'Please input login id!',
+                            },
+                        ]}
+                    >
+                        <Input />
+                    </Form.Item>
+
+                    <Form.Item
+                        label="Name"
+                        name="name"
+                        rules={[
+                            {
+                                required: true,
+                                message: 'Please input name!',
+                            },
+                        ]}
+                    >
+                        <Input />
+                    </Form.Item>
+
+                    <Form.Item
+                        label="Salary"
+                        name="salary"
+                        rules={[
+                            {
+                                required: true,
+                                message: 'Please input salary!',
+                            },
+                        ]}
+                    >
+                        <Input type="number"/>
+                    </Form.Item>
+
+                    <Form.Item {...tailLayout}>
+                    </Form.Item>
+                </Form>
+            </Modal>
+            <Form form={editForm} component={false}>
+                <Table
+                    components={{
+                        body: {
+                            cell: EditableCell,
+                        },
+                    }}
+                    bordered
+                    dataSource={data}
+                    columns={mergedColumns}
+                    rowClassName="editable-row"
+                    pagination={{
+                        onChange: cancel,
+                    }}
+                />
+            </Form>
+        </div>
+
     );
 };
 

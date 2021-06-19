@@ -83,7 +83,7 @@ public class EmployeeController {
         System.out.println(data);
         Employee existingEmp = getEmployeeById(data.get("id")).get();
         Optional<Employee> otherLogin = empRepository.findByLogin(data.get("login"));
-        if (otherLogin.isPresent() && otherLogin.get().equals(existingEmp) && data.get("id") != otherLogin.get().getId()) {
+        if (otherLogin.isPresent()  && data.get("id") != otherLogin.get().getId()) {
             return new ResponseEntity<>("Cannot update to login id, already exist in database: " + data.get("login"), HttpStatus.BAD_REQUEST);
         }
 
@@ -105,6 +105,15 @@ public class EmployeeController {
         if (getEmployeeById(data.get("id")).isPresent()) {
             return new ResponseEntity<>("Cannot add new employee with id, already exist in database:" + data.get("id"), HttpStatus.BAD_REQUEST);
         }
+
+        if (empRepository.findByLogin(data.get("login")).isPresent()) {
+            return new ResponseEntity<>("Cannot add new employee with login, already exist in database:" + data.get("login"), HttpStatus.BAD_REQUEST);
+        }
+
+        if (Double.parseDouble(data.get("salary")) < 0) {
+            return new ResponseEntity<>("Cannot update salary to negative: ", HttpStatus.BAD_REQUEST);
+        }
+
         empRepository.save(new Employee(data.get("id"), data.get("login"), data.get("name"), Double.parseDouble(data.get("salary"))));
         return new ResponseEntity<>("Added new employee with id:"+ data.get("id"), HttpStatus.OK);
     }
