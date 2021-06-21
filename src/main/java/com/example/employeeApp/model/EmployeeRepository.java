@@ -29,4 +29,6 @@ public interface EmployeeRepository extends JpaRepository<Employee, String> {
     <S extends Employee> List<S> saveAll(Iterable<S> iterable);
 
     void deleteById(String s);
+
+    void deleteAll();
 }

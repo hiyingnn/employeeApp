@@ -24,7 +24,7 @@ public class EmployeeController {
 
 
     @GetMapping("/users")
-    Collection<Employee> getAllEmployees() {
+    public Collection<Employee> getAllEmployees() {
        return empRepository.findAll();
     }
 
@@ -79,8 +79,10 @@ public class EmployeeController {
             method=RequestMethod.PATCH)
     @ResponseBody
     ResponseEntity<String> updateEmployeeInformation(@RequestBody Map<String, String> data) {
-        System.out.println("updating");
-        System.out.println(data);
+        if (getEmployeeById(data.get("id")).isEmpty()) {
+            return new ResponseEntity<>("Cannot update non-existing employer id " + data.get("id"), HttpStatus.BAD_REQUEST);
+        }
+
         Employee existingEmp = getEmployeeById(data.get("id")).get();
         Optional<Employee> otherLogin = empRepository.findByLogin(data.get("login"));
         if (otherLogin.isPresent()  && data.get("id") != otherLogin.get().getId()) {
@@ -99,9 +101,7 @@ public class EmployeeController {
             produces = "application/json",
             method=RequestMethod.POST)
     @ResponseBody
-    ResponseEntity<String> addNewEmployee(@RequestBody Map<String, String> data) {
-        System.out.println("adding new employee");
-        System.out.println(data);
+    public ResponseEntity<String> addNewEmployee(@RequestBody Map<String, String> data) {
         if (getEmployeeById(data.get("id")).isPresent()) {
             return new ResponseEntity<>("Cannot add new employee with id, already exist in database:" + data.get("id"), HttpStatus.BAD_REQUEST);
         }
@@ -137,15 +137,12 @@ public class EmployeeController {
                 return new ResponseEntity<>("Invalid headers", HttpStatus.BAD_REQUEST);
             }
 
-//            List<Employee> employees = new ArrayList<>();
             Map<String, Employee> empIdMap = new HashMap<>();
             Set<String> loginSet = new HashSet<>();
 
             Iterable<CSVRecord> csvRecords = csvParser.getRecords();
             for (CSVRecord csvRecord : csvRecords) {
-                System.out.println(loginSet.toString());
                 try {
-                    System.out.println("adding new row");
                     Employee emp = new Employee(
                             csvRecord.get("id"),
                             csvRecord.get("login"),
@@ -161,7 +158,6 @@ public class EmployeeController {
 
                     if (getEmployeeById(emp.getId()).isPresent()) {
                         // check if existing employee id in DB, update if necessary
-                        System.out.println("existing in db" + emp.getId());
                         Map<String, String> updateInfoMap = new HashMap<>();
                         updateInfoMap.put("id", emp.getId());
                         updateInfoMap.put("login", emp.getLogin());
@@ -174,14 +170,12 @@ public class EmployeeController {
                         }
                     } else {
                         if (empIdMap.containsKey(emp.getId())) {
-                            System.out.println("existing in map" + emp.getId());
                             // check if existing employee id in in current CSV file, update if necessary
                             Employee existingEmp = empIdMap.get(emp.getId());
                             existingEmp.updateInfo(emp.getLogin(), emp.getName(), emp.getSalary());
                             empIdMap.put(existingEmp.getId(), existingEmp);
                         } else {
                             // does not exist
-                            System.out.println("does not exist" + emp.getId());
                             empIdMap.put(emp.getId(), emp);
                         }
                         if (loginSet.contains(emp.getLogin())) {
@@ -190,9 +184,8 @@ public class EmployeeController {
                         loginSet.add(emp.getLogin());
                     }
                 } catch (IllegalArgumentException e) {
-                    System.out.println(e);
                     if (csvRecord.get(0).charAt(0) == '#') {
-                        System.out.println("THere exists a #, comment");
+                        System.out.println("There exists a #, comment");
                     } else {
                         return new ResponseEntity<>("Invalid row in CSV", HttpStatus.BAD_REQUEST);
                     }
@@ -204,6 +197,10 @@ public class EmployeeController {
         } catch (IOException e) {
             return new ResponseEntity<>("Invalid CSV file, unable to parse", HttpStatus.BAD_REQUEST);
         }
+    }
+
+    public void deleteAllEmployees() {
+        empRepository.deleteAll();
     }
 }
 
