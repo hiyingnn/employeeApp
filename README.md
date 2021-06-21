@@ -4,8 +4,16 @@
 <!-- Overview-->
 ## Overview
 
-<img src="images/MainPage.png" width="200" height="200" />
 
+<p>
+    <img src="images/MainPage.png" width="1000" height="500" />
+    <em> Main page containing employee dashboard </em>
+</p>
+
+<p>
+    <img src="images/UploadPage.png" width="1000" height="500" />
+    <em> UploadPage to upload .csv files </em>
+</p>
 
 
 This web application allows employees to store and obtain employee salary information by uploading CSV files or using the UI manually input data. The dashboard allows for easy filtering, sorting and searching for relevant employees. Modifications and deletions can also be done on existing employees.
