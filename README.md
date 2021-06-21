@@ -1,5 +1,5 @@
 
-#Technology Associate Programme (TAP) 2021 Assessment: Employee Salary Management Web Application 
+# Technology Associate Programme (TAP) 2021 Assessment: Employee Salary Management Web Application 
 
 <!-- Overview-->
 ## Overview
@@ -105,7 +105,7 @@ This will send a PUT request on the "/users" endpoint to the backend server.
  
  If the login or id already exists in the database, or the salary is invalid, a message will pop up indicating the failure.
   <p>
-      <img src="images/AddMainPage.png" width="700" height="350" />
+      <img src="images/InvalidAddMainPage.png" width="700" height="350" />
       <em> Error indication on invalid input </em>
   </p>
 
