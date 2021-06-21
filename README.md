@@ -6,17 +6,21 @@
 
 
 <p>
-    <img src="images/MainPage.png" width="1000" height="500" />
+    <img src="images/MainPage.png" width="1000" height="550" />
+    <br/>
     <em> Main page containing employee dashboard </em>
 </p>
 
 <p>
-    <img src="images/UploadPage.png" width="1000" height="500" />
+    <img src="images/UploadPage.png" width="1000" height="550" />
+    <br/>
     <em> UploadPage to upload .csv files </em>
 </p>
 
 
-This web application allows employees to store and obtain employee salary information by uploading CSV files or using the UI manually input data. The dashboard allows for easy filtering, sorting and searching for relevant employees. Modifications and deletions can also be done on existing employees.
+This web application allows employees to store and obtain employee salary information by uploading CSV files or using the UI to manually input data. 
+The dashboard allows for easy filtering, sorting and searching for relevant employees. 
+Modifications and deletions can also be done on existing employees.
 
 As such, the user stories that have been completed are:
 * User Story 1: Upload Users (Prioritized)
@@ -68,7 +72,8 @@ The upload will be indicated as a failure, and a pop-over will indicate the caus
 An example where the login id is duplicated in the .csv is as follows:
 
 <p>
-    <img src="images/InvalidUpload.png" width="700" height="350" />
+    <img src="images/InvalidUpload.png" width="700" height="400" />
+    <br/>
     <em> Error indication on invalid csv file uploaded </em>
 </p>
 
@@ -89,7 +94,8 @@ The get request endpoint is as follows:
     @GetMapping("/users/sortOption={option}&sortOrder={order}&filterValue={lower}-{upper}&searchOption={soption}&searchValue={sval}")
   ```
 <p>
-    <img src="images/MainPage.png" width="700" height="350" />
+    <img src="images/MainPage.png" width="700" height="400" />
+    <br/>
     <em> Filter, sort and search on employee dashboard </em>
 </p>
 
@@ -99,26 +105,34 @@ Besides that, clicking "Add New Employee" will open a modal, and the user can ad
 This will send a PUT request on the "/users" endpoint to the backend server.
 
  <p>
-     <img src="images/AddMainPage.png" width="700" height="350" />
+     <img src="images/AddMainPage.png" width="700" height="400" />
+     <br/>
      <em> Modal for users to input individual employee </em>
  </p>
  
  If the login or id already exists in the database, or the salary is invalid, a message will pop up indicating the failure.
   <p>
-      <img src="images/InvalidAddMainPage.png" width="700" height="350" />
+      <img src="images/InvalidAddMainPage.png" width="700" height="400" />
+      <br/>
       <em> Error indication on invalid input </em>
   </p>
 
 #### C. Delete or edit employee
 Clicking the edit icon on the individual row will allow the user to change information of a particular employee. This will send a PATCH request on the "/users" endpoint to update information of the employee.
+
+   <p>
+      <img src="images/EditEmployee.png" width="700" height="400" />
+      <br/>
+      <em> Edit chosen employee </em>
+  </p>
+  
+  
 Updating to a login id that exists in the database will result in a failed update and an error message will be shown. The same would occur if it was updated to an invalid salary.
-<p>
-      <img src="images/AddMainPage.png" width="700" height="350" />
+   
+   <p>
+      <img src="images/EditEmployeeFail.png" width="700" height="400" />
+      <br/>
       <em> Error indication on invalid input </em>
   </p>
   
 Clicking the delete icon on the individual row will delete the employee. This will send a DELETE request on the "/users" endpoint to the backend server.
-<p>
-      <img src="images/AddMainPage.png" width="700" height="350" />
-      <em> Error indication on invalid input </em>
-  </p>
