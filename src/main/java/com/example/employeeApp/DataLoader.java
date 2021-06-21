@@ -21,8 +21,8 @@ public class DataLoader implements ApplicationRunner {
         System.out.println("Initialising data");
 
         // Insert initialisation of data if needed.
-//        empRepository.save(new Employee("e0001","hpotter","Harry Potter",1234));
-//        empRepository.save(new Employee("e0002","rwesley","Ron Weasley",19234 ));
-//        empRepository.save(new Employee("e0003","ssnape","Severus Snape",4000));
+        empRepository.save(new Employee("e0001","hpotter","Harry Potter",1234));
+        empRepository.save(new Employee("e0002","rwesley","Ron Weasley",19234 ));
+        empRepository.save(new Employee("e0003","ssnape","Severus Snape",4000));
     }
 }
