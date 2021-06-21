@@ -44,7 +44,7 @@ Other tools:
 ## Setting Up
 
   ```sh
-  docker-compose up
+  docker-compose up --build
   ```
 
 The web application would then be running on the port of choice (which can be updated in docker-compose.yml), but the default is set as: http://localhost:3000/
@@ -136,3 +136,6 @@ Updating to a login id that exists in the database will result in a failed updat
   </p>
   
 Clicking the delete icon on the individual row will delete the employee. This will send a DELETE request on the "/users" endpoint to the backend server.
+
+## Integration testing
+Integration testing on the api endpoints and controller are implemented [here](src/test/java/com/example/employeeApp/EmployeeRestControllerIntegrationTests.java)
