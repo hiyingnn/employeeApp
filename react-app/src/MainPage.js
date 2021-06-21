@@ -124,6 +124,7 @@ class MainPage extends React.Component {
         // const httpUrl = `users/sortOption=${this.state.filterOptions.sortOption}&sortOrder=${this.state.filterOptions.sortOrder}`;
         fetch(httpUrl)
             .then(response => response.json())
+            .then(data => data.map( d => ({...d, key: d.id})))
             .then(data => this.setState(this.setState({data})));
     };
 
